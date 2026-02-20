@@ -28,6 +28,5 @@ ENDPOINT=host:port TOKEN=xxx PROTO_PATH=/path/to/proto ./test-grpcurl.sh
 - `MODE` — `both` (default), `pumpfun`, `pumpswap`
 - `ZSTD=1` — enable compression
 - `ADAPTIVE=1` — adaptive HTTP/2 window
-- `WINDOW=n` — custom HTTP/2 window size
 - `DURATION=n` — test seconds (grpcurl, default 60)
 - `PROTO_PATH` — path to geyser.proto

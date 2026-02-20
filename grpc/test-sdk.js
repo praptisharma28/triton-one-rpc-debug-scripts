@@ -8,7 +8,7 @@ const USE_ZSTD = process.env.ZSTD === "1";
 const USE_ADAPTIVE = process.env.ADAPTIVE === "1";
 
 if (!ENDPOINT || !TOKEN) {
-  console.error("ENDPOINT=host:port TOKEN=xxx [MODE=both|pumpfun|pumpswap] [ZSTD=1] [ADAPTIVE=1] [WINDOW=n] node test-sdk.js");
+  console.error("ENDPOINT=host:port TOKEN=xxx [MODE=both|pumpfun|pumpswap] [ZSTD=1] [ADAPTIVE=1] node test-sdk.js");
   process.exit(1);
 }
 
@@ -22,11 +22,6 @@ async function main() {
 
   if (USE_ZSTD) channelOptions.grpcDefaultCompressionAlgorithm = 1;
   if (USE_ADAPTIVE) channelOptions.grpcHttp2AdaptiveWindow = true;
-  if (process.env.WINDOW) {
-    const w = parseInt(process.env.WINDOW);
-    channelOptions.grpcInitialConnectionWindowSize = w;
-    channelOptions.grpcInitialStreamWindowSize = w;
-  }
 
   console.log(`SDK | Mode: ${MODE} | Endpoint: ${ENDPOINT} | zstd: ${USE_ZSTD} | adaptive: ${USE_ADAPTIVE}`);
 
