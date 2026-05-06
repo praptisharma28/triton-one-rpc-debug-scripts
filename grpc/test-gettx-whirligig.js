@@ -3,6 +3,12 @@ const https = require("https");
 
 const GRPC_ENDPOINT = process.env.ENDPOINT;
 const TOKEN = process.env.TOKEN;
+
+if (!GRPC_ENDPOINT || !TOKEN) {
+  console.error("Usage: ENDPOINT=host TOKEN=xxx node test-gettx-whirligig.js");
+  process.exit(1);
+}
+
 const WS_URL = `wss://${GRPC_ENDPOINT}/${TOKEN}/whirligig`;
 const RPC_URL = `https://${GRPC_ENDPOINT}/${TOKEN}`;
 

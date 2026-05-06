@@ -41,8 +41,14 @@ while true; do
     [[ -z "$(echo "$block" | jq -r '.error // empty')" ]] && slot=$s && break
   done
 
-  sigs=$(echo "$block" | jq -r '.result.signatures[]' | head -${CONCURRENCY})
-  count=$(echo "$sigs" | wc -l | tr -d ' ')
+  if ! echo "$block" | jq -e '.error == null and (.result.signatures | type == "array")' >/dev/null 2>&1; then
+    echo "r${round}: getBlock failed for slots ${slot}-$((slot - 5))"
+    sleep 1
+    continue
+  fi
+
+  sigs=$(echo "$block" | jq -r --argjson limit "$CONCURRENCY" '(.result.signatures // [])[:$limit][]')
+  count=$(echo "$block" | jq -r --argjson limit "$CONCURRENCY" '(.result.signatures // [])[:$limit] | length')
   total=$((total + count))
 
   pids=()

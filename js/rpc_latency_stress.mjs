@@ -1,4 +1,5 @@
 import https from 'https';
+import http from 'http';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -17,10 +18,11 @@ function call(id) {
   return new Promise((resolve) => {
     const body = JSON.stringify({ jsonrpc: "2.0", id, method: METHOD, params: PARAMS });
     const url = new URL(RPC_URL);
+    const transport = url.protocol === "http:" ? http : https;
     const t = Date.now();
-    const req = https.request({
+    const req = transport.request({
       hostname: url.hostname,
-      port: url.port || 443,
+      port: url.port || (url.protocol === "http:" ? 80 : 443),
       path: url.pathname + url.search,
       method: "POST",
       headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
