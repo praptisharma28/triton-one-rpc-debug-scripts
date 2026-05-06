@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ENDPOINT="${1:?Usage: $0 <endpoint> <token>}"
-TOKEN="$2"
+TOKEN="${2:?Usage: $0 <endpoint> <token>}"
 BASE_URL="${BASE_URL:-https://${ENDPOINT}/${TOKEN}}"
 CONCURRENCY=100
 LOGFILE="blocktime-nulls-$(date +%Y%m%d-%H%M%S).log"
@@ -53,7 +53,7 @@ while true; do
   done <<< "$sigs"
   for pid in "${pids[@]}"; do wait "$pid"; done
 
-  nulls=$(wc -l < "$LOGFILE" 2>/dev/null || echo 0)
+  nulls=$(grep -c '^---$' "$LOGFILE" 2>/dev/null || echo 0)
   echo "r${round} slot=${slot} checked=${count} total=${total} nulls=${nulls}"
 
   sleep 1

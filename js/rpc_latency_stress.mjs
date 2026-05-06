@@ -20,8 +20,8 @@ function call(id) {
     const t = Date.now();
     const req = https.request({
       hostname: url.hostname,
-      port: 443,
-      path: url.pathname,
+      port: url.port || 443,
+      path: url.pathname + url.search,
       method: "POST",
       headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
     }, (res) => {
@@ -29,7 +29,7 @@ function call(id) {
       res.on("end", () => resolve({ elapsed: Date.now() - t, status: res.statusCode }));
     });
     req.on("error", (e) => resolve({ elapsed: Date.now() - t, error: e.message }));
-    req.setTimeout(30000);
+    req.setTimeout(30000, () => { req.destroy(); resolve({ elapsed: Date.now() - t, error: "timeout" }); });
     req.write(body);
     req.end();
   });
@@ -48,8 +48,13 @@ async function main() {
   }
 
   const times = results.filter((r) => !r.error).map((r) => r.elapsed).sort((a, b) => a - b);
-  const p = (n) => times[Math.floor(times.length * n)] ?? 0;
 
+  if (times.length === 0) {
+    console.log(`\n\nall ${results.length} requests failed`);
+    process.exit(1);
+  }
+
+  const p = (n) => times[Math.floor(times.length * n)] ?? 0;
   console.log(`\n\nN=${times.length} min=${times[0]}ms p50=${p(0.5)}ms p90=${p(0.9)}ms p95=${p(0.95)}ms p99=${p(0.99)}ms max=${times[times.length - 1]}ms`);
 
   const slow = results.filter((r) => r.elapsed > 5000);

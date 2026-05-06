@@ -12,8 +12,8 @@ function rpcCall(method, params) {
     const url = new URL(RPC_URL);
     const req = https.request({
       hostname: url.hostname,
-      port: 443,
-      path: url.pathname,
+      port: url.port || 443,
+      path: url.pathname + url.search,
       method: "POST",
       headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
     }, (res) => {
@@ -42,7 +42,7 @@ async function main() {
     if (!data.transaction) return;
     if (tested >= 20) return;
 
-    const sig = bs58.default.encode(data.transaction.transaction.signature);
+    const sig = bs58.encode(data.transaction.transaction.signature);
     const slot = Number(data.transaction.slot);
     const streamTime = Date.now();
 

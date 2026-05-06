@@ -12,8 +12,8 @@ function rpcCall(method, params) {
     const url = new URL(RPC_URL);
     const req = https.request({
       hostname: url.hostname,
-      port: 443,
-      path: url.pathname,
+      port: url.port || 443,
+      path: url.pathname + url.search,
       method: "POST",
       headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
     }, (res) => {
