@@ -4,11 +4,11 @@ const bs58 = require("bs58").default || require("bs58");
 const ENDPOINT = process.env.ENDPOINT;
 const TOKEN = process.env.TOKEN;
 const MODE = process.env.MODE || "both";
-const USE_ZSTD = process.env.ZSTD === "1";
+const USE_DEFLATE = process.env.DEFLATE === "1";
 const USE_ADAPTIVE = process.env.ADAPTIVE === "1";
 
 if (!ENDPOINT || !TOKEN) {
-  console.error("ENDPOINT=host:port TOKEN=xxx [MODE=both|pumpfun|pumpswap] [ZSTD=1] [ADAPTIVE=1] node test-sdk.js");
+  console.error("ENDPOINT=host:port TOKEN=xxx [MODE=both|pumpfun|pumpswap] [DEFLATE=1] [ADAPTIVE=1] node test-sdk.js");
   process.exit(1);
 }
 
@@ -20,10 +20,10 @@ const PUMPSWAP_BYTES = Buffer.from(bs58.decode(PUMPSWAP));
 async function main() {
   const channelOptions = { grpcMaxDecodingMessageSize: 64 * 1024 * 1024 };
 
-  if (USE_ZSTD) channelOptions.grpcDefaultCompressionAlgorithm = 1;
+  if (USE_DEFLATE) channelOptions.grpcDefaultCompressionAlgorithm = 1;
   if (USE_ADAPTIVE) channelOptions.grpcHttp2AdaptiveWindow = true;
 
-  console.log(`SDK | Mode: ${MODE} | Endpoint: ${ENDPOINT} | zstd: ${USE_ZSTD} | adaptive: ${USE_ADAPTIVE}`);
+  console.log(`SDK | Mode: ${MODE} | Endpoint: ${ENDPOINT} | deflate: ${USE_DEFLATE} | adaptive: ${USE_ADAPTIVE}`);
 
   const client = new Client("https://" + ENDPOINT, TOKEN, channelOptions);
   await client.connect();

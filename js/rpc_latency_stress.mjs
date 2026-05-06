@@ -5,7 +5,11 @@ dotenv.config();
 
 const RPC_URL = process.env.RPC_URL;
 const METHOD = process.env.METHOD || "getSlot";
-const PARAMS = process.env.PARAMS ? JSON.parse(process.env.PARAMS) : [{ commitment: "confirmed" }];
+let PARAMS = [{ commitment: "confirmed" }];
+if (process.env.PARAMS) {
+  try { PARAMS = JSON.parse(process.env.PARAMS); }
+  catch { process.stderr.write("Invalid PARAMS: must be valid JSON.\n"); process.exit(1); }
+}
 const N = parseInt(process.env.N || "200");
 const BATCH = parseInt(process.env.BATCH || "10");
 
@@ -28,7 +32,12 @@ function call(id) {
       headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(body) },
     }, (res) => {
       res.resume();
-      res.on("end", () => resolve({ elapsed: Date.now() - t, status: res.statusCode }));
+      res.on("end", () => {
+        const elapsed = Date.now() - t;
+        const status = res.statusCode ?? 0;
+        if (status >= 200 && status < 300) resolve({ elapsed, status });
+        else resolve({ elapsed, status, error: `http ${status}` });
+      });
     });
     req.on("error", (e) => resolve({ elapsed: Date.now() - t, error: e.message }));
     req.setTimeout(30000, () => { req.destroy(); resolve({ elapsed: Date.now() - t, error: "timeout" }); });
@@ -56,7 +65,10 @@ async function main() {
     process.exit(1);
   }
 
-  const p = (n) => times[Math.floor(times.length * n)] ?? 0;
+  const p = (n) => {
+    const idx = Math.min(times.length - 1, Math.max(0, Math.ceil(times.length * n) - 1));
+    return times[idx] ?? 0;
+  };
   console.log(`\n\nN=${times.length} min=${times[0]}ms p50=${p(0.5)}ms p90=${p(0.9)}ms p95=${p(0.95)}ms p99=${p(0.99)}ms max=${times[times.length - 1]}ms`);
 
   const slow = results.filter((r) => r.elapsed > 5000);
